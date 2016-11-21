@@ -4,12 +4,12 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-//#include <omp.h>
+#include <omp.h>
 
 const int MAX_THREADS = 64;
 
-//void Upper_triangular(double A[], double b[], int n, int thread_count);
-//void Row_solve(double A[], double b[], double x[], int n, int thread_count);
+void Upper_triangular(double A[], double b[], int n, int thread_count);
+void Row_solve(double A[], double b[], double x[], int n, int thread_count);
 void usage(char* prog_name);
 
 
@@ -27,6 +27,7 @@ int main(int argc, char * argv[]) {
         usage(argv[0]);
     }
 
+/*
     printf("Threads: %d \n File name: %s \n", threadCount, f_name); //printing
     FILE *in_file; //mysterious problem
     printf("Declared in_file"); //not printing
@@ -36,43 +37,56 @@ int main(int argc, char * argv[]) {
     }
 
     printf("Opened File");
+*/
+    int rows = 3;
+    int cols = 3;
 
-    int rows = fscanf(in_file, "%d");
-    int cols = fscanf(in_file, "%d");
-
-    int * A = malloc(rows*cols*sizeof(int));
+    double * A = malloc(rows*cols*sizeof(double));
+    double *b = malloc(rows*sizeof(double));
+    double *x = malloc(rows*sizeof(double));
 
     int i, j;
     for(i = 0; i < rows; i++){
     	for(j = 0; j < cols; j++){
-    		A[i*cols + j] = fscanf(in_file, "%d");
+    		A[i*cols + j] = (double) rand();
     	}
     }
 
-    printf("Filled array");
+    for(i = 0; i < rows; i++){
+	b[i] = (double) rand();
+    }
 
+    Upper_triangular(A, b, rows*cols, threadCount);
+    Row_solve(A, b, x, rows*cols, threadCount);
+    
+
+    printf("Filled array\n");
+/*
     for(i=0; i < (rows*cols); i++){
     	printf("%d", A[i]);
     }  
+*/
 
+    return 0;
 
 }
 
-/*
-void Upper_triangular(double A[], double b[], int n, int thread_count) {
+
+void Upper_triangular(double *A, double *b, int n, int thread_count) {
 	int i,j,k;
 	#pragma  omp parallel num_threads(thread_count) default(none) private(i, j, k) shared(A, b, n)  
 	for(i=0; i< n-1; i++){
 		#pragma omp for 
-		for(int j = i; j < n; j++) {
+		for(j = i; j < n; j++) {
 			double r = A[j*n+i] / A[i*n+i];
-			for (int k=i; k< n; k++) {
+			for(k=i; k< n; k++) {
 				A[j*n+k] -= (r * A[i*n+k]);
 				b[j] -= (r * b[i]);
 			}
 		}
 	}
 } /* Upper_triangular */
+
 
 /*--------------------------------------------------------------------
  * Function:  Row_solve
@@ -82,8 +96,7 @@ void Upper_triangular(double A[], double b[], int n, int thread_count) {
  *
  * Notes: Written as a class
  */
-/*
-void Row_solve(double A[], double b[], double x[], int n, int thread_count) {
+void Row_solve(double *A, double *b, double *x, int n, int thread_count) {
    int i, j;
    double tmp;
 
