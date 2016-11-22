@@ -12,10 +12,9 @@ void Upper_triangular(double A[], double b[], int n, int thread_count);
 void Row_solve(double A[], double b[], double x[], int n, int thread_count);
 void usage(char* prog_name);
 
-
 int main(int argc, char * argv[]) {
 
-	    // Get number of threads from command line
+    // Get number of threads from command line
     if (argc != 3){
         usage(argv[0]);
     }
@@ -27,54 +26,47 @@ int main(int argc, char * argv[]) {
         usage(argv[0]);
     }
 
-/*
-    printf("Threads: %d \n File name: %s \n", threadCount, f_name); //printing
-    FILE *in_file; //mysterious problem
-    printf("Declared in_file"); //not printing
+    printf("Threads: %d \n File name: %s \n", threadCount, f_name); 
+    FILE *in_file; 
+    printf("Declared in_file\n"); 
     
     if((in_file = fopen(f_name, "r")) == NULL){
     	perror("Error");
     }
 
-    printf("Opened File");
-*/
-    int rows = 3;
-    int cols = 3;
+    printf("Opened File\n");
+
+    int rows;
+    fscanf(in_file, "%d", &rows);
+    int cols;
+    fscanf(in_file, "%d", &cols);
 
     double * A = malloc(rows*cols*sizeof(double));
-    double *b = malloc(rows*sizeof(double));
-    double *x = malloc(rows*sizeof(double));
+    double * b = malloc(rows*sizeof(double));
+    double * x = malloc(rows*sizeof(double));
 
     int i, j;
     for(i = 0; i < rows; i++){
     	for(j = 0; j < cols; j++){
-    		A[i*cols + j] = (double) rand();
+    		fscanf(in_file, "%lf", &A[i*cols + j]);
     	}
     }
-
-    for(i = 0; i < rows; i++){
-	b[i] = (double) rand();
+    for(i=0; i < rows; i++){
+	fscanf(in_file, "%lf", &b[i]);
     }
 
-    Upper_triangular(A, b, rows*cols, threadCount);
-    Row_solve(A, b, x, rows*cols, threadCount);
     
+    #pragma  omp parallel num_threads(threadCount)
 
-    printf("Filled array\n");
-/*
-    for(i=0; i < (rows*cols); i++){
-    	printf("%d", A[i]);
-    }  
-*/
+    Upper_triangular(A, b, (rows*cols), threadCount);
+    Row_solve(A, b, x, (rows*cols), threadCount);
 
     return 0;
-
 }
 
 
 void Upper_triangular(double *A, double *b, int n, int thread_count) {
-	int i,j,k;
-	#pragma  omp parallel num_threads(thread_count) default(none) private(i, j, k) shared(A, b, n)  
+	int i,j,k;  
 	for(i=0; i< n-1; i++){
 		#pragma omp for 
 		for(j = i; j < n; j++) {
@@ -100,8 +92,6 @@ void Row_solve(double *A, double *b, double *x, int n, int thread_count) {
    int i, j;
    double tmp;
 
-#pragma  omp parallel num_threads(thread_count) \
-default(none) private(i, j) shared(A, b, x, n, tmp)  
 for (i = n-1; i >= 0; i--) {
 #pragma omp single
       tmp = b[i];
