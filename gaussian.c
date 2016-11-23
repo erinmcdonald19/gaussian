@@ -9,7 +9,7 @@
 const int MAX_THREADS = 64;
 
 void Upper_triangular(double A[], double b[], int n, int thread_count);
-void Row_solve(double A[], double b[], double x[], int n, int thread_count);
+void Row_solve(double A[], double b[], double x[], int n, int thread_count, double tmp);
 void usage(char* prog_name);
 
 int main(int argc, char * argv[]) {
@@ -26,15 +26,13 @@ int main(int argc, char * argv[]) {
         usage(argv[0]);
     }
 
-    printf("Threads: %d \n File name: %s \n", threadCount, f_name); 
+    printf("Threads: %d \nFile name: %s \n", threadCount, f_name); 
     FILE *in_file; 
-    printf("Declared in_file\n"); 
+
     
     if((in_file = fopen(f_name, "r")) == NULL){
     	perror("Error");
     }
-
-    printf("Opened File\n");
 
     int rows;
     fscanf(in_file, "%d", &rows);
@@ -55,11 +53,14 @@ int main(int argc, char * argv[]) {
 	fscanf(in_file, "%lf", &b[i]);
     }
 
-    
-    #pragma  omp parallel num_threads(threadCount)
+    double tmp = 0;
 
     Upper_triangular(A, b, (rows*cols), threadCount);
-    Row_solve(A, b, x, (rows*cols), threadCount);
+    Row_solve(A, b, x, (rows*cols), threadCount, tmp);
+
+    for(i=0; i< rows; i++){
+	printf("%lf", x[i]);
+    }
 
     return 0;
 }
@@ -67,8 +68,9 @@ int main(int argc, char * argv[]) {
 
 void Upper_triangular(double *A, double *b, int n, int thread_count) {
 	int i,j,k;  
+#pragma omp parallel
 	for(i=0; i< n-1; i++){
-		#pragma omp for 
+#pragma omp for 
 		for(j = i; j < n; j++) {
 			double r = A[j*n+i] / A[i*n+i];
 			for(k=i; k< n; k++) {
@@ -88,20 +90,21 @@ void Upper_triangular(double *A, double *b, int n, int thread_count) {
  *
  * Notes: Written as a class
  */
-void Row_solve(double *A, double *b, double *x, int n, int thread_count) {
-   int i, j;
-   double tmp;
+void Row_solve(double *A, double *b, double *x, int n, int thread_count, double tmp) {
+   	int i, j;
 
-for (i = n-1; i >= 0; i--) {
+#pragma  omp parallel num_threads(thread_count) \
+default(none) private(i, j) shared(A, b, x, n, tmp)  
+	for (i = n-1; i >= 0; i--) {
 #pragma omp single
-      tmp = b[i];
+      		tmp = b[i];
 
 #pragma omp for reduction(+: tmp)
-      for (j = i+1; j < n; j++)
-         tmp += -A[i*n+j]*x[j];
+     		for (j = i+1; j < n; j++)
+         		tmp += -A[i*n+j]*x[j];
 
 #pragma omp single
-      x[i] = tmp/A[i*n+i];
+     		x[i] = tmp/A[i*n+i];
    }
 }  /* Row_solve */
 
