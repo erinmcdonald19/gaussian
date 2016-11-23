@@ -55,8 +55,8 @@ int main(int argc, char * argv[]) {
 
     double tmp = 0;
 
-    Upper_triangular(A, b, (rows*cols), threadCount);
-    Row_solve(A, b, x, (rows*cols), threadCount, tmp);
+    Upper_triangular(A, b, rows, threadCount);
+    Row_solve(A, b, x, rows, threadCount, tmp);
 
     for(i=0; i< rows; i++){
 	printf("%lf", x[i]);
@@ -71,7 +71,7 @@ void Upper_triangular(double *A, double *b, int n, int thread_count) {
 #pragma omp parallel
 	for(i=0; i< n-1; i++){
 #pragma omp for 
-		for(j = i; j < n; j++) {
+		for(j = i+1; j < n; j++) {
 			double r = A[j*n+i] / A[i*n+i];
 			for(k=i; k< n; k++) {
 				A[j*n+k] -= (r * A[i*n+k]);
