@@ -79,9 +79,9 @@ void Upper_triangular(double *A, double *b, int n, int thread_count) {
 		for(j = i+1; j <= n; j++) {
 			double r = A[j*n+i] / A[i*n+i];
 			for(k = i; k <= n; k++) {
-				A[j*n+k] -= (r * A[i*n+k]);
-				b[j] -= (r * b[i]);
+				A[j*n+k] -= (r * A[i*n+k]);	
 			}
+			b[j] -= (r * b[i]);
 		}
 #pragma omp barrier
 	}
