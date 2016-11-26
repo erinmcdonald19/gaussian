@@ -63,6 +63,10 @@ int main(int argc, char * argv[]) {
 	printf("%lf\n", x[i]);
     }
 
+    free(A);
+    free(b);
+    free(x);
+
     return 0;
 }
 
