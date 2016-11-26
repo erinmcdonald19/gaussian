@@ -56,6 +56,7 @@ int main(int argc, char * argv[]) {
     double tmp = 0;
 
     Upper_triangular(A, b, rows, threadCount);
+
     Row_solve(A, b, x, rows, threadCount, tmp);
 
     for(i=0; i< rows; i++){
@@ -78,6 +79,7 @@ void Upper_triangular(double *A, double *b, int n, int thread_count) {
 				b[j] -= (r * b[i]);
 			}
 		}
+	return;
 	}
 } /* Upper_triangular */
 
@@ -93,8 +95,7 @@ void Upper_triangular(double *A, double *b, int n, int thread_count) {
 void Row_solve(double *A, double *b, double *x, int n, int thread_count, double tmp) {
    	int i, j;
 
-#pragma  omp parallel num_threads(thread_count) \
-default(none) private(i, j) shared(A, b, x, n, tmp)  
+#pragma  omp parallel num_threads(thread_count) default(none) private(i, j) shared(A, b, x, n, tmp)  
 	for (i = n-1; i >= 0; i--) {
 #pragma omp single
       		tmp = b[i];
@@ -106,6 +107,7 @@ default(none) private(i, j) shared(A, b, x, n, tmp)
 #pragma omp single
      		x[i] = tmp/A[i*n+i];
    }
+   return;
 }  /* Row_solve */
 
 void usage(char* prog_name) {
