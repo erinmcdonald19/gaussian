@@ -79,8 +79,9 @@ void Upper_triangular(double *A, double *b, int n, int thread_count) {
 				b[j] -= (r * b[i]);
 			}
 		}
-	return;
+#pragma omp barrier
 	}
+	return;
 } /* Upper_triangular */
 
 
