@@ -69,11 +69,11 @@ int main(int argc, char * argv[]) {
 void Upper_triangular(double *A, double *b, int n, int thread_count) {
 	int i,j,k;  
 #pragma omp parallel num_threads(thread_count) default(none) shared(A,b,n) private(i,j,k)
-	for(i=0; i< n-1; i++){
+	for(i = 0; i < n-1; i++){
 #pragma omp for 
-		for(j = i+1; j < n; j++) {
+		for(j = i+1; j <= n; j++) {
 			double r = A[j*n+i] / A[i*n+i];
-			for(k=i; k< n; k++) {
+			for(k = i; k <= n; k++) {
 				A[j*n+k] -= (r * A[i*n+k]);
 				b[j] -= (r * b[i]);
 			}
